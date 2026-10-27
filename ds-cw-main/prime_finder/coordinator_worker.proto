@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package coordinator_worker;
+
+message TaskRequest {
+    int32 worker_id = 1;
+}
+
+message TaskResponse {
+    bool has_task = 1;
+    int32 task_id = 2;
+    string filename = 3;
+    int64 start_line = 4;
+    int64 end_line = 5;
+}
+
+message ResultSubmission {
+    int32 worker_id = 1;
+    int32 task_id = 2;
+    repeated int64 primes = 3;
+}
+
+message ResultAck {
+    bool success = 1;
+    string message = 2;
+}
+
+message RegisterRequest {
+    string worker_name = 1;
+    string worker_address = 2;
+}
+
+message RegisterResponse {
+    int32 worker_id = 1;
+    string afs_server_address = 2;
+}
+
+message MarkerRequest {
+    string message = 1;
+}
+
+message MarkerResponse {
+    string message = 1;
+    int32 worker_id = 2;
+    string current_filename = 3;
+    int64 current_start_line = 4;
+    int64 current_end_line = 5;
+    int64 current_line_process = 6;
+    repeated uint64 collected_primes = 7;
+    int32 tasks_completed = 8;
+}
+
+
+message HeartbeatRequest{
+    string message =1;
+}
+
+message HeartbeatResponse{
+    string message =1;
+}
+
+
+service WorkerServer{
+rpc sendMarker (MarkerRequest) returns (MarkerResponse);
+rpc sendHeartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+}
+
+service CoordinatorService {
+    rpc RegisterWorker (RegisterRequest) returns (RegisterResponse);
+    rpc RequestTask (TaskRequest) returns (TaskResponse);
+    rpc SubmitResult (ResultSubmission) returns (ResultAck);
+    
+}
